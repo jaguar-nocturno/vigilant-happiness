@@ -4,7 +4,7 @@
 
 **Resumen:** Se expone el proceso de desarrollo de un flujo de procesamiento para rastrear, segmentar y analizar robots competidores de la Copa FutBot Mx (Federación Mexicana de Robótica) mediante técnicas de visión computacional, transformación de perspectivas y análisis de datos. Se usó el modelo Segment Anything Model 3 como herramienta central en su configuración base (sin ajuste fino ni entrenamiento) a través de la librería de Ultralytics. Los resultados incluyen: video con anotaciones y segmentaciones de los robots combinado con el mapa táctico, con las coordenadas estimadas mediante homografía. Archivos CSV con datos de posición y velocidad, los cuales fueron sometidos a un breve análisis con estadísticas generales de cada robot. El análisis aplica solamente para videos con cámara fija, en una vista cenital ligeramente desviada pero que se puedan apreciar al menos 4 puntos distintivos del campo de juego. No es aplicable aun para videos con diferentes tomas, acercamientos o cambios de ángulos.
 
-1.  ***Introducción y objetivos***
+# 1.  ***Introducción y objetivos***
 
 Este documento pretende ser un registro y explicación de cómo fue el proceso de desarrollo, aprendizaje, resolución de obstáculos. Si bien tiene una estructura similar a la de un paper, no cuenta con todos los requisitos de estilo ni rigurosos. La participación es en la categoría amateur, pero se usó este formato ya que permite explicar de forma detallada todo el proceso de aprendizaje, obstáculos encontrados así como algunas observaciones y comentarios sobre cada etapa.
 
