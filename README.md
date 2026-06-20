@@ -26,7 +26,7 @@ Desde mi experiencia y perspectiva, la parte más trabajosa fue entender cómo a
 
 Todos los cuadernos fueron elaborados en un entorno en la nube de Google Colab. A excepción del notebook 0 de exploración, el cual fue desarrollado en un entorno de Kaggle debido a que los límites de uso de GPU y RAM son más amplios, pues se requería mucho tiempo de depuración y varias pruebas de prompts en un solo video.
 
-a.  **Uso de modelos de lenguaje en el proyecto**
+## a.  **Uso de modelos de lenguaje en el proyecto**
 
 Los modelos de lenguaje se usaron para poder entender mejor algunos conceptos, pedir recomendaciones de modelos específicos, por ejemplo "un modelo no supervisado similar a DINO v3 que sea sensible al color". Se usaron tanto Claude como Gemini. Fueron cruciales en los últimos 7 días previos a la fecha de entrega.
 
@@ -40,7 +40,7 @@ Se uso Claude para generar el archivo de licencia para el repositorio de GitHub,
 
 Esta fase fue crucial pues definió cuál sería la aproximación para este proyecto. Aquí se integraron todos los conocimientos desde el Notebook 1 hasta el 12, para poder crear una visualización experimental en un video de 1 minuto. Cabe mencionar que SAM 3 tardó alrededor de 12 minutos en procesar los 1800 frames (aproximadamente) de todo el minuto.
 
-a.  **Cálculo de homografía y campo canónico**
+## a.  **Cálculo de homografía y campo canónico**
 
 Esta parte es vital pues sin esta no seria posible recrear el mapa táctico, las posiciones reales ni la velocidad de cada objeto dentro de la cancha. Para esto se asume que hay una vista "distorsionada" y una "vista real". Estas dos vistas corresponden a diferentes perspectivas de un mismo plano. Para poder hacer la transformación de una vista oblicua a una vista cenital se requiere de una matriz de transformación H, y se requieren 4 puntos muestras de la vista oblicua y sus correspondientes en la vista cenital canónica.
 
@@ -56,11 +56,11 @@ Esa imagen fue recreada en GeoGebra para verificar de forma precisa cada punto c
 
 Para seleccionar de forma precisa y correcta los puntos muestra del video original se uso la herramienta interactiva en línea de Roboflow [[https://polygonzone.roboflow.com/]{.underline}](https://polygonzone.roboflow.com/) que permite subir cualquier imagen y genera un arreglo de numpy con las coordenadas en pixeles de cada uno de los puntos seleccionados.
 
-b.  **Calculo de velocidad**
+## b.  **Calculo de velocidad**
 
 Se tuvo la intención de calcular la velocidad pero los resultados no fueron precisos. La intención era usar la posición de hace 15 o 10 frames, pero se necesitaba una lista que guardara las 15 posiciones previas de cada una de las detecciones, un buffer. Por lo que la velocidad que se muestra en las etiquetas no representa la velocidad real, sino una estimación. La velocidad se anota en decímetros por segundo.
 
-c.  **Generación de mapa táctico con OpenCV**
+## c.  **Generación de mapa táctico con OpenCV**
 
 Para generar una vista del campo canónico justo a un lado del video exportado se recurrió a OpenCV dado que genera las anotaciones e imágenes de forma más rápida que librerías como matplotlib. El código base se encontraba en los notebooks 10 y 11 de Thinkific. Ese codigo generaba en una misma funcion la imagen de la cancha y generaba los dibujos de los robots. Se cambio un poco el funcionamiento de tal forma que la generacion del mapa tuviera su propia funcion, mientras que los dibujos de los robots tenian una funcion para cada uno. Asimismo, el mapa original del notebook era una aproximación del mapa real. Durante el desarrollo se investigaron las medidas exactas de la cancha y se generó un nuevo mapa táctico adaptado a esas medidas. Se muestra la comparación entre el mapa original del notebook (izquierda) y el mapa generado en el proyecto (derecha), se dibujaron también los "puntos neutrales" en los que la pelota es reposicionada por el referee en ciertos momentos del partido. Esto requirió del entendimiento de las funciones de dibujo de OpenCV así como de consultar la documentación y los argumentos requeridos.
 
@@ -70,7 +70,7 @@ Para generar una vista del campo canónico justo a un lado del video exportado s
 
   -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-d.  **Exportación de video lado a lado**
+## d.  **Exportación de video lado a lado**
 
 Aquí se puede dividir en dos partes: el uso de vstack y hstack y la generacion de las anotaciones en el mapa táctico. Se usaron las herramientas de lectura de video y escritura que OpenCV ya tiene por defecto, en lugar de supervision.ProcessVideo, ya que se cuenta con más opciones de personalización.
 
@@ -92,35 +92,35 @@ De igual forma, se tomaron como base los códigos y funciones de ejemplo que est
 ```{=html}
 <!-- -->
 ```
-a.  **Capacidad de procesamiento requerida para SAM 3**
+### a.  **Capacidad de procesamiento requerida para SAM 3**
 
 Para darse una idea de la capacidad de procesamiento requerida. Para poder rastrear 4 o 5 objetos en un video a 30 FPS, en tiempo real, se requiere de una tarjeta H200. Para rastrear hasta 10 objetos se requirió de dos H200 (también en 30 FPS), para rastrear hasta 28 objetos se utilizaron cuatro H200. Esta información se encuentra en el paper original. El precio de uno solo de estos equipos ronda entre los 35,000.00 y 45,000.00 dolares.
 
 Es un modelo bastante poderoso y capaz, y es prácticamente imposible para la mayoría de las personas ejecutarlo en tiempo real en videos a 30F FPS o más. Aun así, su capacidad es impresionante pues llega a suceder que segmenta cosas que un humano no ve a simple vista, como robots que estaban detrás de una persona o escondidos en el fondo al lado de una laptop.
 
-b.  **Poca presencia de videos adecuados**
+### b.  **Poca presencia de videos adecuados**
 
 Logre identificar dos videos con cámara fija y de duración adecuada. Les faltaba una sección de la cancha y se logró hacer el análisis a pesar de esto. No se está afirmando que son videos obtenidos de una forma inadecuada, sino que para el nivel del equipo (y el objetivo del análisis) las técnicas necesarias para procesarlos requieren de más tiempo y preparación, específicamente entrenar un modelo que detecte los puntos clave de la cancha y realizar una transformación mediante homografía y aproximar las posiciones reales de los jugadores en la cancha. Claro que se pueden rastrear y segmentar pero los resultados podrían ser más inconsistentes si no son tomas fijas.
 
-c.  **Problemas de segmentación de robots y pelota en un mismo video**
+### c.  **Problemas de segmentación de robots y pelota en un mismo video**
 
 Al definir entradas de texto como \["small robot","orange ball"\] el modelo identificaba uno que otro robot como una pelota naranja en lugar de robot, muy posiblemente porque había momentos en los que las luces rojas se tornaban naranjas o había partes del robot que eran rojizas. También pasaba que partes del cuerpo como una mano, un dedo o una pulsera eran detectadas como "small orange ball". Debido a esto se decidió crear un detector aparte para la pelota, basado en filtros HSV. El texto que presentaba menos anomalías para la pelota era "tennis ball" o "orange tennis ball", si ocurren las anomalías mencionadas pero con menos frecuencia.
 
 Lo anterior se pudo haber resuelto mediante ejemplos negativos o indicarle al modelo que cosas no debía segmentar. Sin embargo, el notebook en el cual se hablaba de esto no fue revisado a profundidad por el equipo así que este tipo de prompts no fueron aplicados aquí.
 
-d.  **Problemas de segmentación de robots por color o por equipo.**
+### d.  **Problemas de segmentación de robots por color o por equipo.**
 
 Otro de los problemas que se presentaban al usar Promptable Concept Segmentation es que tampoco se podían segmentar por equipos. Se intentaron prompts como "green robot", "black robot", "green team robot", "black team robot", "robot with a green circle", "robot with black case". Ocurría que no detectaba a todos los robots de la forma esperada.
 
 Los prompts con mejor resultado fueron "robot" y "small robot", también se intentó con "small vehicle" pero no segmentó todos los robots. Esto fue ya después de haber decidido no segmentar la pelota en el mismo prompt.
 
-e.  **Inconsistencia de los IDs de rastreo a lo largo de todo el video.**
+### e.  **Inconsistencia de los IDs de rastreo a lo largo de todo el video.**
 
 No es un inconveniente solamente de SAM 3, sino que puede ocurrir en otros modelos. Hubo muchas ocasiones en que los robots salen de la vista de la cámara y reingresaban. A pesar de que un humano podía identificar que eran los mismos robots por las etiquetas que tenían adheridas a la parte superior (10A, 10B y 17B), el rastreador nativo de SAM no logró eso al menos de una forma estable, pues asignaba nuevas IDs a los robots. Considerando que se usó a través de la librería de Ultralytics y no mediante los códigos e instrucciones específicas de SAM en Hugging Face. Posiblemente una modificacion en los parametros habria podido reducir esto.
 
 Se identificaron en total 328 numeros de rastreo, de los cuales una buena parte correspondian a objetos que eran falsos positivos, como un baston, una porteria, una mano o incluso la cancha completa (este ultimo ocurria al final cuando ya no habian robots en la cancha).
 
-f.  **Resultados de agrupación con K Means y SigLIP (en lugar de DINOv3)**
+### f.  **Resultados de agrupación con K Means y SigLIP (en lugar de DINOv3)**
 
 Para tratar de resolver el punto anterior se decidió explorar el notebook 14 donde utilizaba DINO v3, en los ejemplos se mostraba que la similitud coseno entre la imagen de un robot en escala de grises y su original era muy cercana a 1. Lo cual indica que no es sensible al cambio de color, al menos en estos robots. Se decidió usar SIGLip el cual sí mostró mejores resultados y métricas de similitud coseno más cercanas entre robots del mismo color. Se hicieron pruebas iniciales con una muestra pequeña tomada a mano con capturas de pantalla. Luego se generó un dataset de imágenes recortadas, con más de 1000 recortes en total generados de forma automática.
 
