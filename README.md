@@ -4,19 +4,15 @@
 
 **Resumen:** Se expone el proceso de desarrollo de un flujo de procesamiento para rastrear, segmentar y analizar robots competidores de la Copa FutBot Mx (Federación Mexicana de Robótica) mediante técnicas de visión computacional, transformación de perspectivas y análisis de datos. Se usó el modelo Segment Anything Model 3 como herramienta central en su configuración base (sin ajuste fino ni entrenamiento) a través de la librería de Ultralytics. Los resultados incluyen: video con anotaciones y segmentaciones de los robots combinado con el mapa táctico, con las coordenadas estimadas mediante homografía. Archivos CSV con datos de posición y velocidad, los cuales fueron sometidos a un breve análisis con estadísticas generales de cada robot. El análisis aplica solamente para videos con cámara fija, en una vista cenital ligeramente desviada pero que se puedan apreciar al menos 4 puntos distintivos del campo de juego. No es aplicable aun para videos con diferentes tomas, acercamientos o cambios de ángulos.
 
-## 1.  ***Introducción y objetivos***
+## 1.  **Introducción y objetivos**
 
 Este documento pretende ser un registro y explicación de cómo fue el proceso de desarrollo, aprendizaje, resolución de obstáculos. Si bien tiene una estructura similar a la de un paper, no cuenta con todos los requisitos de estilo ni rigurosos. La participación es en la categoría amateur, pero se usó este formato ya que permite explicar de forma detallada todo el proceso de aprendizaje, obstáculos encontrados así como algunas observaciones y comentarios sobre cada etapa.
 
 En un inicio quería crear un prototipo de aplicación con interfaz amigable que pudiera servir para casi cualquier video. Esta aplicación tendrá las siguientes características:
-
--   Mostrar el campo canónico al lado del video
-
--   Rastrear a los robots a lo largo del partido y detectar pases y goles en tiempo real.
-
--   Mostrar un registro de eventos al costado en el que fueran apareciendo en texto los eventos a medida que ocurrían.
-
--   Poder descargar los datos de posición, velocidad y tiempo al finalizar el video.
+*   Mostrar el campo canónico al lado del video
+*   Rastrear a los robots a lo largo del partido y detectar pases y goles en tiempo real.
+*   Mostrar un registro de eventos al costado en el que fueran apareciendo en texto los eventos a medida que ocurrían.
+*   Poder descargar los datos de posición, velocidad y tiempo al finalizar el video.
 
 Sin embargo en aquel momento desconocía de la capacidad de procesamiento requerida para poder utilizar SAM 3, desconocía cómo usar las librerías de ultralytics y supervision. No estaba enterado de todos los errores en Python que podían surgir al procesar las detecciones o generar las visualizaciones en los videos. Tenía planeado apoyarme con Claude y la interfaz amigable de Roboflow para gran parte del proceso, pero decidí reescribir cada uno de los notebooks línea por línea y entender cómo funcionan los ecosistemas de ultralytics y supervisión.
 
@@ -26,7 +22,7 @@ Desde mi experiencia y perspectiva, la parte más trabajosa fue entender cómo a
 
 Todos los cuadernos fueron elaborados en un entorno en la nube de Google Colab. A excepción del notebook 0 de exploración, el cual fue desarrollado en un entorno de Kaggle debido a que los límites de uso de GPU y RAM son más amplios, pues se requería mucho tiempo de depuración y varias pruebas de prompts en un solo video.
 
-## a.  **Uso de modelos de lenguaje en el proyecto**
+### a.  **Uso de modelos de lenguaje en el proyecto**
 
 Los modelos de lenguaje se usaron para poder entender mejor algunos conceptos, pedir recomendaciones de modelos específicos, por ejemplo "un modelo no supervisado similar a DINO v3 que sea sensible al color". Se usaron tanto Claude como Gemini. Fueron cruciales en los últimos 7 días previos a la fecha de entrega.
 
@@ -40,7 +36,7 @@ Se uso Claude para generar el archivo de licencia para el repositorio de GitHub,
 
 Esta fase fue crucial pues definió cuál sería la aproximación para este proyecto. Aquí se integraron todos los conocimientos desde el Notebook 1 hasta el 12, para poder crear una visualización experimental en un video de 1 minuto. Cabe mencionar que SAM 3 tardó alrededor de 12 minutos en procesar los 1800 frames (aproximadamente) de todo el minuto.
 
-## a.  **Cálculo de homografía y campo canónico**
+### a.  **Cálculo de homografía y campo canónico**
 
 Esta parte es vital pues sin esta no seria posible recrear el mapa táctico, las posiciones reales ni la velocidad de cada objeto dentro de la cancha. Para esto se asume que hay una vista "distorsionada" y una "vista real". Estas dos vistas corresponden a diferentes perspectivas de un mismo plano. Para poder hacer la transformación de una vista oblicua a una vista cenital se requiere de una matriz de transformación H, y se requieren 4 puntos muestras de la vista oblicua y sus correspondientes en la vista cenital canónica.
 
@@ -56,21 +52,21 @@ Esa imagen fue recreada en GeoGebra para verificar de forma precisa cada punto c
 
 Para seleccionar de forma precisa y correcta los puntos muestra del video original se uso la herramienta interactiva en línea de Roboflow [[https://polygonzone.roboflow.com/]{.underline}](https://polygonzone.roboflow.com/) que permite subir cualquier imagen y genera un arreglo de numpy con las coordenadas en pixeles de cada uno de los puntos seleccionados.
 
-## b.  **Calculo de velocidad**
+### b.  **Calculo de velocidad**
 
 Se tuvo la intención de calcular la velocidad pero los resultados no fueron precisos. La intención era usar la posición de hace 15 o 10 frames, pero se necesitaba una lista que guardara las 15 posiciones previas de cada una de las detecciones, un buffer. Por lo que la velocidad que se muestra en las etiquetas no representa la velocidad real, sino una estimación. La velocidad se anota en decímetros por segundo.
 
-## c.  **Generación de mapa táctico con OpenCV**
+### c.  **Generación de mapa táctico con OpenCV**
 
 Para generar una vista del campo canónico justo a un lado del video exportado se recurrió a OpenCV dado que genera las anotaciones e imágenes de forma más rápida que librerías como matplotlib. El código base se encontraba en los notebooks 10 y 11 de Thinkific. Ese codigo generaba en una misma funcion la imagen de la cancha y generaba los dibujos de los robots. Se cambio un poco el funcionamiento de tal forma que la generacion del mapa tuviera su propia funcion, mientras que los dibujos de los robots tenian una funcion para cada uno. Asimismo, el mapa original del notebook era una aproximación del mapa real. Durante el desarrollo se investigaron las medidas exactas de la cancha y se generó un nuevo mapa táctico adaptado a esas medidas. Se muestra la comparación entre el mapa original del notebook (izquierda) y el mapa generado en el proyecto (derecha), se dibujaron también los "puntos neutrales" en los que la pelota es reposicionada por el referee en ciertos momentos del partido. Esto requirió del entendimiento de las funciones de dibujo de OpenCV así como de consultar la documentación y los argumentos requeridos.
 
   -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-  ![](media/image2.png){width="2.9791666666666665in" height="4.0in"}   ![](media/image20.png){width="2.9791666666666665in" height="3.9722222222222223in"}
+  ![](media/image2.png){width="2.97in" height="4.0in"}   ![](media/image20.png){width="2.97in" height="3.97in"}
   ------------------------------------------------------------------------------ ----------------------------------------------------------------------------------------------
 
   -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-## d.  **Exportación de video lado a lado**
+### d.  **Exportación de video lado a lado**
 
 Aquí se puede dividir en dos partes: el uso de vstack y hstack y la generacion de las anotaciones en el mapa táctico. Se usaron las herramientas de lectura de video y escritura que OpenCV ya tiene por defecto, en lugar de supervision.ProcessVideo, ya que se cuenta con más opciones de personalización.
 
@@ -126,7 +122,7 @@ Para tratar de resolver el punto anterior se decidió explorar el notebook 14 do
 
 ## 5.  ***Metodología y flujo de procesamiento. ()***
 
-    a.  **Procesamiento base y extracción de máscaras** *(Notebooks 1 y 2)*
+### a.  **Procesamiento base y extracción de máscaras** *(Notebooks 1 y 2)*
 
 Debido a que SAM 3 requiere de tiempo y capacidad de procesamiento considerables, se pensó en guardar las detecciones para no tener que cargarlo y ejecutarlo cada vez que se quisiera consultar alguna información o hacer una modificación en los Annotators. De esta forma, solo se ejecutaría una sola vez en todo el video, y las segmentaciones quedarían guardadas en el almacenamiento de Drive.
 
@@ -144,7 +140,7 @@ Cabe mencionar que la librería tqdm fue de vital importancia para ver el progre
 
 En el archivo CSV se incluyeron los puntos canónicos, los cuales fueron calculados usando la matriz H obtenida en el notebook 0 de exploración de este proyecto.
 
-b.  **Aislamiento y detección de pelota (Notebook 3)**
+### b.  **Aislamiento y detección de pelota (Notebook 3)**
 
 Debido a las anomalías en las segmentaciones de la pelota junto a los robots, se decidio crear un detector HSV exclusivamente para la pelota. Esto funcionó ya que la cámara estaba estatica y la iluminación era más o menos constante. Asimismo, ayudo el hecho de que era un color naranja muy brillante. Se hicieron varias pruebas hasta encontrar un rango que no excediera en pasarla por alto, ni se excediera en reconocer otros objetos (como luces o piel de los participantes). En esta etapa fue de mucha ayuda el sitio ***Pseudo Open CV.*** El cual tenia una seccion en la que podias subir una imagen y experimentar con los limites HSV y ver los resultados en tiempo real. Una vez encontrado el umbral adecuado, se ejecuto en el video completo y se guardaron los datos de las detecciones en formato CSV.
 
@@ -152,7 +148,7 @@ Debido a las anomalías en las segmentaciones de la pelota junto a los robots, s
 
 Aqui se aplicaron las tecnicas mostradas en el notebook 11. Tales como el uso de un kernel y modificaciones morfologicas para eliminar ruido y mejorar la deteccion de contornos.
 
-c.  **Generación de datasets y recortes (Notebook 4)**
+### c.  **Generación de datasets y recortes (Notebook 4)**
 
 Una de las capacidades mas poderosas de SAM 3, es el poder generar datasets etiquetados automáticamente a partir de videos y fotografias, usando la funcion sv.crop_image de supervision y cv2.imwrite de Open CV. En esta etapa tuve ayuda de Claude para poder generar la funcion y poder entenderla. El codigo se configuro de tal forma que se pudiera elegir una muestra de frames no aleatoria cada 10,15 o 30 frames.
 
@@ -168,7 +164,7 @@ Cabe mencionar que también use la librería de tqdm para ver el progreso en tie
 
 ![](media/image28.png){width="4.598620953630796in" height="2.1923654855643044in"}
 
-d.  **Análisis de embeddings con SigLIP y ordenamiento de IDs de rastreo (Notebook 5).**
+### d.  **Análisis de embeddings con SigLIP y ordenamiento de IDs de rastreo (Notebook 5).**
 
 Es importante mencionar algo sobre esta sección: no se tenía planeado realizar este análisis, sino ignorar el notebook 14 del curso en Thinkific. Pero debido a que había más de 300 IDs de rastreo creo que valía la pena intentarlo. Para poder lograr esto copie línea por línea el notebook 14 hasta la parte donde se hacía el clustering con K Means, ignore las demás secciones debido a cuestiones de tiempo.
 
