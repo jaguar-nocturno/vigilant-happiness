@@ -1,10 +1,10 @@
-**Segmentacion, rastreo y analisis post-partido de robots participantes de la Copa FutBot MX utilizando Segment Anything Model 3**
+# **Segmentacion, rastreo y analisis post-partido de robots participantes de la Copa FutBot MX utilizando Segment Anything Model 3**
 
 *Angel Gabriel Jimenez Isidro*
 
 **Resumen:** Se expone el proceso de desarrollo de un flujo de procesamiento para rastrear, segmentar y analizar robots competidores de la Copa FutBot Mx (Federación Mexicana de Robótica) mediante técnicas de visión computacional, transformación de perspectivas y análisis de datos. Se usó el modelo Segment Anything Model 3 como herramienta central en su configuración base (sin ajuste fino ni entrenamiento) a través de la librería de Ultralytics. Los resultados incluyen: video con anotaciones y segmentaciones de los robots combinado con el mapa táctico, con las coordenadas estimadas mediante homografía. Archivos CSV con datos de posición y velocidad, los cuales fueron sometidos a un breve análisis con estadísticas generales de cada robot. El análisis aplica solamente para videos con cámara fija, en una vista cenital ligeramente desviada pero que se puedan apreciar al menos 4 puntos distintivos del campo de juego. No es aplicable aun para videos con diferentes tomas, acercamientos o cambios de ángulos.
 
-# 1.  ***Introducción y objetivos***
+## 1.  ***Introducción y objetivos***
 
 Este documento pretende ser un registro y explicación de cómo fue el proceso de desarrollo, aprendizaje, resolución de obstáculos. Si bien tiene una estructura similar a la de un paper, no cuenta con todos los requisitos de estilo ni rigurosos. La participación es en la categoría amateur, pero se usó este formato ya que permite explicar de forma detallada todo el proceso de aprendizaje, obstáculos encontrados así como algunas observaciones y comentarios sobre cada etapa.
 
@@ -22,7 +22,7 @@ Sin embargo en aquel momento desconocía de la capacidad de procesamiento requer
 
 Desde mi experiencia y perspectiva, la parte más trabajosa fue entender cómo aplicar y desplegar un modelo de visión computacional, entender todo el ecosistema que lo maneja y contiene, como conectarlo con otras aplicaciones o dependencias. Tengo la impresión de que es mucho más fácil entrenar un modelo y evaluar sus métricas. Estas opiniones pueden estar muy sesgadas debido a que este fue mi primer contacto con el entorno de librerías como supervision y ultralytics, posiblemente mi visión cambie una vez tenga mas experiencia.
 
-# 2.  ***Entorno de desarrollo y herramientas***
+## 2.  ***Entorno de desarrollo y herramientas***
 
 Todos los cuadernos fueron elaborados en un entorno en la nube de Google Colab. A excepción del notebook 0 de exploración, el cual fue desarrollado en un entorno de Kaggle debido a que los límites de uso de GPU y RAM son más amplios, pues se requería mucho tiempo de depuración y varias pruebas de prompts en un solo video.
 
@@ -36,7 +36,7 @@ Para la documentación, se hicieron consultas sobre como estructurar mejor las s
 
 Se uso Claude para generar el archivo de licencia para el repositorio de GitHub, asi como la presentacion de PowerPoint.
 
-# 3.  ***Fase exploración y problemas encontrados (Notebook 0)***
+## 3.  ***Fase exploración y problemas encontrados (Notebook 0)***
 
 Esta fase fue crucial pues definió cuál sería la aproximación para este proyecto. Aquí se integraron todos los conocimientos desde el Notebook 1 hasta el 12, para poder crear una visualización experimental en un video de 1 minuto. Cabe mencionar que SAM 3 tardó alrededor de 12 minutos en procesar los 1800 frames (aproximadamente) de todo el minuto.
 
@@ -87,7 +87,7 @@ De igual forma, se tomaron como base los códigos y funciones de ejemplo que est
 
   --------------------------------------------------------------------------------------------
 
-# 4.  ***Problemas encontrados en la fase de exploración***
+## 4.  ***Problemas encontrados en la fase de exploración***
 
 ```{=html}
 <!-- -->
@@ -124,7 +124,7 @@ Se identificaron en total 328 numeros de rastreo, de los cuales una buena parte 
 
 Para tratar de resolver el punto anterior se decidió explorar el notebook 14 donde utilizaba DINO v3, en los ejemplos se mostraba que la similitud coseno entre la imagen de un robot en escala de grises y su original era muy cercana a 1. Lo cual indica que no es sensible al cambio de color, al menos en estos robots. Se decidió usar SIGLip el cual sí mostró mejores resultados y métricas de similitud coseno más cercanas entre robots del mismo color. Se hicieron pruebas iniciales con una muestra pequeña tomada a mano con capturas de pantalla. Luego se generó un dataset de imágenes recortadas, con más de 1000 recortes en total generados de forma automática.
 
-# 5.  ***Metodología y flujo de procesamiento. ()***
+## 5.  ***Metodología y flujo de procesamiento. ()***
 
     a.  **Procesamiento base y extracción de máscaras** *(Notebooks 1 y 2)*
 
@@ -190,7 +190,7 @@ Al final me decante por la asignación manual utilizando una hoja de Google Spre
 
 Es importante mencionar también que el proceso manual requirió de mucho menos tiempo a comparación de leer, entender y replicar el notebook 14 y hacer algunas modificaciones. En contextos como este podría considerarse que aplica un refrán popular que dice "Salió más caro el caldo que las albóndigas". O posiblemente no, pues de paso pude recrear la funcionalidad de Roboflow
 
-# 6.  ***Procesamiento de datos y limpieza (Notebook 6)***
+## 6.  ***Procesamiento de datos y limpieza (Notebook 6)***
 
 Esta parte es un área del análisis de datos que también tiene una amplia variedad de técnicas y conocimientos, y que bajo ciertas condiciones podría considerarse otro proyecto aparte del de visión artificial. Por ejemplo, cuando se tuviera los datos de varios partidos y varios robots, el proceso de limpieza y ordenamiento del dataset requiere de metodologías específicas, más aún cuando se trata de variables que cambian con el tiempo.
 
@@ -214,7 +214,7 @@ En este último se intentó mezclar con la distancias y velocidades de los robot
 
 En esta etapa también se pide código a Gemini y Claude. Hubo varias ocasiones en las que se tuvo que recurrir a copiar y pegar el código directamente. A pesar de los inconvenientes, las columnas con datos no inconsistentes fueron muy útiles para visualizar y cuantificar lo observado durante el partido.
 
-# 7.  ***Resultados y visualizaciones (Notebook 7 y 8)***
+## 7.  ***Resultados y visualizaciones (Notebook 7 y 8)***
 
 ```{=html}
 <!-- -->
@@ -279,7 +279,7 @@ c.  **Mapas de calor**
 
   --------------------------------------------------------------------------------------------
 
-# 8.  ***Instrucciones de uso de notebooks.***
+## 8.  ***Instrucciones de uso de notebooks.***
 
 El objetivo de esta sección es explicar de forma general cómo implementar el flujo de trabajo por parte del lector en otros videos de la copa FutBotMX, y videos de competencias similares.
 
@@ -315,7 +315,7 @@ b.  **Requisitos de hardware y software.**
 
 Un entorno de desarrollo en la nube como Google Colab y Kaggle, con entornos en los que la memoria virtual de la GPU sea de al menos 16GB, son suficientes para poder ejecutar los notebooks. Para ejecutar el modelo de SAM3 se usaron memorias T4 de Nvidia (las proporcionadas por Colab y Kaggle).
 
-# 9.  **Conclusiones**
+## 9.  **Conclusiones**
 
 Se logro desarrollar un conjunto de notebooks que emulan el objetivo inicial. SAM 3 fue el punto central para el desarrollo de todo el proyecto, pues no fue necesario entrenar ningun modelo y tiene un gran potencial para muchas aplicaciones del mundo real, una de las mas poderosas es la etiquetacion casi automatica de imagenes y generacion de conjuntos de datos para diversos modelos destinados a entornos que requieren procesamiento en tiempo real.
 
